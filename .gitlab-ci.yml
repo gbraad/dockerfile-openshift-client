@@ -10,19 +10,31 @@ stages:
   - build
   - sync
 
-build_image:
+build_scratch:
   stage: build
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - cd scratch
     - wget https://github.com/openshift/origin/releases/download/v1.1.6/openshift-origin-client-tools-v1.1.6-ef1caba-linux-64bit.tar.gz -O oc.tar.gz
     - tar -zxvf oc.tar.gz
-    - docker build -t registry.gitlab.com/gbraad/openshift-client:latest .
-    - docker push registry.gitlab.com/gbraad/openshift-client:latest
+    - docker build -t registry.gitlab.com/gbraad/openshift-client:scratch .
+    - docker push registry.gitlab.com/gbraad/openshift-client:scratch
 
-clone_image:
+clone_scratch:
   stage: sync
   script:
-    - docker pull registry.gitlab.com/gbraad/openshift-client:latest
-    - docker tag registry.gitlab.com/gbraad/openshift-client:latest gbraad/openshift-client:latest
-    - docker push gbraad/openshift-client:latest
+    - docker pull registry.gitlab.com/gbraad/openshift-client:scratch
+    - docker tag registry.gitlab.com/gbraad/openshift-client:scratch gbraad/openshift-client:scratch
+    - docker push gbraad/openshift-client:scratch
 
+build_centos:
+  stage: build
+  script:
+    - docker build -t registry.gitlab.com/gbraad/openshift-client:centos ./centos 
+    - docker push registry.gitlab.com/gbraad/openshift-client:centos
+
+build_fedora:
+  stage: build
+  script:
+    - docker build -t registry.gitlab.com/gbraad/openshift-client:fedora ./fedora 
+    - docker push registry.gitlab.com/gbraad/openshift-client:fedora
