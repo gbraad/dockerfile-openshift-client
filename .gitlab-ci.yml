@@ -1,0 +1,28 @@
+image: docker:git
+services:
+  - docker:dind
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+  - docker login -e ma@gbraad.nl -u gbraad -p $DOCKER_PASSWORD
+
+stages:
+  - build
+  - sync
+
+build_image:
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - wget https://github.com/openshift/origin/releases/download/v1.1.6/openshift-origin-client-tools-v1.1.6-ef1caba-linux-64bit.tar.gz -O oc.tar.gz
+    - tar -zxvf oc.tar.gz
+    - docker build -t registry.gitlab.com/gbraad/openshift-client:latest .
+    - docker push registry.gitlab.com/gbraad/openshift-client:latest
+
+clone_image:
+  stage: sync
+  script:
+    - docker pull registry.gitlab.com/gbraad/openshift-client:latest
+    - docker tag registry.gitlab.com/gbraad/openshift-client:latest gbraad/openshift-client:latest
+    - docker push gbraad/openshift-client:latest
+
